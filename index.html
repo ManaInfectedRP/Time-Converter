@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Time Converter</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3250;
+      --accent: #6366f1;
+      --accent2: #818cf8;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --green: #22c55e;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent2);
+      letter-spacing: -0.02em;
+    }
+
+    header h1 span { color: var(--text); }
+
+    /* Local time hero */
+    .hero {
+      background: linear-gradient(135deg, #1a1d27 0%, #1e2035 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hero-time {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .hero-time .seconds {
+      color: var(--accent);
+    }
+
+    .hero-date {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .hero-tz {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: var(--accent2);
+      margin-top: 8px;
+    }
+
+    .hero-tz::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(34,197,94,0.2);
+    }
+
+    /* Controls */
+    .controls {
+      padding: 24px 32px 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 10px 14px 10px 38px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    .filter-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn:hover { border-color: var(--accent); color: var(--accent2); }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .count-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* Grid */
+    .grid {
+      padding: 20px 32px 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .tz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      cursor: default;
+      transition: border-color 0.15s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tz-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .tz-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .tz-card:hover::before { opacity: 1; }
+
+    .tz-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .tz-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .tz-region {
+      font-size: 0.7rem;
+      color: var(--border);
+      margin-top: 2px;
+    }
+
+    .tz-offset {
+      font-size: 0.72rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tz-time {
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    .tz-time .ampm {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-left: 3px;
+    }
+
+    .tz-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .tz-diff {
+      font-size: 0.7rem;
+      margin-top: 6px;
+      color: var(--accent2);
+    }
+
+    .copy-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      color: var(--border);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      opacity: 0;
+    }
+
+    .tz-card:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { color: var(--accent2); background: var(--surface2); }
+    .copy-btn.copied { color: var(--green); }
+
+    /* Day indicator */
+    .day-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .day-badge.yesterday { background: rgba(239,68,68,0.15); color: #f87171; }
+    .day-badge.tomorrow  { background: rgba(34,197,94,0.15);  color: #4ade80; }
+
+    /* Empty state */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .empty svg { margin-bottom: 16px; opacity: 0.3; }
+    .empty p { font-size: 0.9rem; }
+
+    @media (max-width: 600px) {
+      header, .hero, .controls, .grid { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="10"/>
+    <polyline points="12 6 12 12 16 14"/>
+  </svg>
+  <h1>Time <span>Converter</span></h1>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Your local time</div>
+  <div class="hero-time" id="heroTime">--:--:<span class="seconds">--</span></div>
+  <div class="hero-date" id="heroDate"></div>
+  <div class="hero-tz" id="heroTz">Detecting...</div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="text" id="search" placeholder="Search timezone, city, country…" />
+  </div>
+  <div class="filter-btns" id="filterBtns">
+    <button class="filter-btn active" data-region="All">All</button>
+    <button class="filter-btn" data-region="Africa">Africa</button>
+    <button class="filter-btn" data-region="America">Americas</button>
+    <button class="filter-btn" data-region="Asia">Asia</button>
+    <button class="filter-btn" data-region="Australia">Australia</button>
+    <button class="filter-btn" data-region="Europe">Europe</button>
+    <button class="filter-btn" data-region="Pacific">Pacific</button>
+  </div>
+  <span class="count-label" id="countLabel"></span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+  const TIMEZONES = Intl.supportedValuesOf('timeZone');
+  const LOCAL_TZ  = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  let query  = '';
+  let region = 'All';
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  function getOffset(tz, date) {
+    const fmt = new Intl.DateTimeFormat('en', {
+      timeZone: tz, timeZoneName: 'shortOffset'
+    });
+    const parts = fmt.formatToParts(date);
+    return parts.find(p => p.type === 'timeZoneName')?.value ?? '';
+  }
+
+  function formatTime(tz, date) {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: true
+    }).format(date);
+  }
+
+  function formatDate(tz, date) {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+    }).format(date);
+  }
+
+  function getDayDiff(tz, date) {
+    const localDay = new Date(date.toLocaleDateString('en-CA', { timeZone: LOCAL_TZ }));
+    const remDay   = new Date(date.toLocaleDateString('en-CA', { timeZone: tz }));
+    return (remDay - localDay) / 86400000;
+  }
+
+  function getOffsetMinutes(tz, date) {
+    const utc  = Date.UTC(
+      ...['en-US'].map(() => {
+        const f = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'UTC',
+          year:'numeric', month:'2-digit', day:'2-digit',
+          hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false
+        });
+        return null;
+      })
+    );
+    // simple method: compare UTC to local
+    const utcDate   = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const tzDate    = new Date(date.toLocaleString('en-US', { timeZone: tz }));
+    return (tzDate - utcDate) / 60000;
+  }
+
+  function diffLabel(tz, date) {
+    const localMins = getOffsetMinutes(LOCAL_TZ, date);
+    const tzMins    = getOffsetMinutes(tz, date);
+    const diff      = tzMins - localMins;
+    if (diff === 0) return 'Same as you';
+    const sign  = diff > 0 ? '+' : '−';
+    const abs   = Math.abs(diff);
+    const h     = Math.floor(abs / 60);
+    const m     = abs % 60;
+    return `${sign}${h}${m ? `:${String(m).padStart(2,'0')}` : ''}h from you`;
+  }
+
+  // ── DOM build ─────────────────────────────────────────────────────────────
+
+  function buildCards() {
+    const filtered = TIMEZONES.filter(tz => {
+      const r = region === 'All' || tz.startsWith(region);
+      const q = !query || tz.toLowerCase().includes(query);
+      return r && q;
+    });
+
+    document.getElementById('countLabel').textContent =
+      `${filtered.length} timezone${filtered.length !== 1 ? 's' : ''}`;
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div class="empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          <p>No timezones match "<strong>${query}</strong>"</p>
+        </div>`;
+      return;
+    }
+
+    filtered.forEach(tz => {
+      const parts  = tz.split('/');
+      const city   = (parts[parts.length - 1] || tz).replace(/_/g, ' ');
+      const rgn    = parts[0] || '';
+      const subRgn = parts.length > 2 ? parts[1].replace(/_/g, ' ') + ' · ' : '';
+
+      const card = document.createElement('div');
+      card.className  = 'tz-card';
+      card.dataset.tz = tz;
+
+      card.innerHTML = `
+        <div class="tz-card-header">
+          <div>
+            <div class="tz-name">${city}</div>
+            <div class="tz-region">${subRgn}${rgn}</div>
+          </div>
+          <span class="tz-offset" data-offset></span>
+        </div>
+        <div class="tz-time" data-time></div>
+        <div class="tz-date" data-date></div>
+        <div class="tz-diff" data-diff></div>
+        <button class="copy-btn" title="Copy time" data-copy>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+        </button>`;
+
+      card.querySelector('[data-copy]').addEventListener('click', (e) => {
+        const btn  = e.currentTarget;
+        const time = card.querySelector('[data-time]').textContent;
+        const date = card.querySelector('[data-date]').textContent;
+        navigator.clipboard.writeText(`${time} — ${date} (${tz})`).then(() => {
+          btn.classList.add('copied');
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/></svg>`;
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+          }, 2000);
+        });
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  // ── tick ──────────────────────────────────────────────────────────────────
+
+  function tick() {
+    const now = new Date();
+
+    // hero
+    const hParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: LOCAL_TZ,
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    }).formatToParts(now);
+
+    const hh  = hParts.find(p => p.type === 'hour')?.value   ?? '--';
+    const mm  = hParts.find(p => p.type === 'minute')?.value ?? '--';
+    const ss  = hParts.find(p => p.type === 'second')?.value ?? '--';
+    const ap  = hParts.find(p => p.type === 'dayPeriod')?.value ?? '';
+    document.getElementById('heroTime').innerHTML =
+      `${hh}:${mm}:<span class="seconds">${ss}</span> <span style="font-size:2rem;font-weight:500;color:var(--muted)">${ap}</span>`;
+
+    document.getElementById('heroDate').textContent = formatDate(LOCAL_TZ, now);
+    document.getElementById('heroTz').textContent   = LOCAL_TZ;
+
+    // cards
+    document.querySelectorAll('.tz-card').forEach(card => {
+      const tz = card.dataset.tz;
+
+      const rawTime = formatTime(tz, now);           // "09:41:07 AM"
+      const [timePart, period] = rawTime.split(' ');
+      card.querySelector('[data-time]').innerHTML =
+        `${timePart}<span class="ampm">${period}</span>`;
+
+      const dayDiff = getDayDiff(tz, now);
+      let dateTxt   = formatDate(tz, now);
+      let badge     = '';
+      if (dayDiff === -1) badge = '<span class="day-badge yesterday">−1 day</span>';
+      if (dayDiff ===  1) badge = '<span class="day-badge tomorrow">+1 day</span>';
+      card.querySelector('[data-date]').innerHTML = dateTxt + badge;
+
+      card.querySelector('[data-offset]').textContent = getOffset(tz, now);
+      card.querySelector('[data-diff]').textContent   = diffLabel(tz, now);
+    });
+  }
+
+  // ── init ──────────────────────────────────────────────────────────────────
+
+  document.getElementById('search').addEventListener('input', e => {
+    query = e.target.value.trim().toLowerCase();
+    buildCards();
+    tick();
+  });
+
+  document.getElementById('filterBtns').addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    region = btn.dataset.region;
+    buildCards();
+    tick();
+  });
+
+  buildCards();
+  tick();
+  setInterval(tick, 1000);
+</script>
+</body>
+</html>
