@@ -17,6 +17,7 @@
       --text: #e2e8f0;
       --muted: #64748b;
       --green: #22c55e;
+      --orange: #f59e0b;
       --radius: 12px;
     }
 
@@ -27,7 +28,6 @@
       min-height: 100vh;
     }
 
-    /* Header */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -49,7 +49,7 @@
 
     header h1 span { color: var(--text); }
 
-    /* Local time hero */
+    /* ── Hero ── */
     .hero {
       background: linear-gradient(135deg, #1a1d27 0%, #1e2035 100%);
       border-bottom: 1px solid var(--border);
@@ -58,6 +58,11 @@
       flex-direction: column;
       align-items: center;
       gap: 8px;
+      transition: background 0.3s;
+    }
+
+    .hero.custom-mode {
+      background: linear-gradient(135deg, #1a1d27 0%, #1e2a20 100%);
     }
 
     .hero-label {
@@ -77,8 +82,12 @@
       line-height: 1;
     }
 
-    .hero-time .seconds {
-      color: var(--accent);
+    .hero-time .seconds { color: var(--accent); }
+    .hero-time .src-tz-abbr {
+      font-size: clamp(1.2rem, 3vw, 2.2rem);
+      font-weight: 600;
+      color: var(--orange);
+      margin-left: 10px;
     }
 
     .hero-date {
@@ -107,9 +116,141 @@
       background: var(--green);
       border-radius: 50%;
       box-shadow: 0 0 0 2px rgba(34,197,94,0.2);
+      flex-shrink: 0;
     }
 
-    /* Controls */
+    .hero-tz.custom-src::before { background: var(--orange); box-shadow: 0 0 0 2px rgba(245,158,11,0.2); }
+
+    .hero-local-equiv {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .hero-local-equiv strong { color: var(--text); }
+
+    .btn-live {
+      margin-top: 6px;
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-live:hover { border-color: var(--green); color: var(--green); }
+    .btn-live.visible { display: inline-flex; align-items: center; gap: 6px; }
+
+    /* ── Converter bar ── */
+    .converter-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .conv-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .conv-input-wrap {
+      flex: 1;
+      min-width: 200px;
+      max-width: 480px;
+      position: relative;
+    }
+
+    .conv-input-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    #convInput {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 9px 36px 9px 36px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    #convInput:focus { border-color: var(--accent); }
+    #convInput::placeholder { color: var(--muted); }
+    #convInput.ok  { border-color: rgba(34,197,94,0.5); }
+    #convInput.err { border-color: rgba(239,68,68,0.4); }
+
+    .conv-clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: none;
+      transition: color 0.15s;
+    }
+
+    .conv-clear-btn.visible { display: block; }
+    .conv-clear-btn:hover { color: var(--text); }
+
+    .conv-status {
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 100px;
+      transition: all 0.15s;
+    }
+
+    .conv-status.ok  { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.25);  color: #4ade80; }
+    .conv-status.err { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.25);  color: #f87171; }
+    .conv-status:not(.ok):not(.err) { display: none; }
+
+    .conv-examples {
+      font-size: 0.72rem;
+      color: var(--muted);
+      flex-basis: 100%;
+      padding-left: 2px;
+    }
+
+    .conv-examples span {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1px 7px;
+      margin: 2px 3px 2px 0;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .conv-examples span:hover { border-color: var(--accent); color: var(--accent2); }
+
+    /* ── Controls ── */
     .controls {
       padding: 24px 32px 0;
       display: flex;
@@ -148,11 +289,7 @@
     input[type="text"]:focus { border-color: var(--accent); }
     input[type="text"]::placeholder { color: var(--muted); }
 
-    .filter-btns {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
+    .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 
     .filter-btn {
       background: var(--surface);
@@ -176,7 +313,7 @@
       white-space: nowrap;
     }
 
-    /* Grid */
+    /* ── Grid ── */
     .grid {
       padding: 20px 32px 48px;
       display: grid;
@@ -195,10 +332,7 @@
       overflow: hidden;
     }
 
-    .tz-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-1px);
-    }
+    .tz-card:hover { border-color: var(--accent); transform: translateY(-1px); }
 
     .tz-card::before {
       content: '';
@@ -219,18 +353,8 @@
       margin-bottom: 10px;
     }
 
-    .tz-name {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.02em;
-    }
-
-    .tz-region {
-      font-size: 0.7rem;
-      color: var(--border);
-      margin-top: 2px;
-    }
+    .tz-name   { font-size: 0.78rem; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
+    .tz-region { font-size: 0.7rem; color: var(--border); margin-top: 2px; }
 
     .tz-offset {
       font-size: 0.72rem;
@@ -251,24 +375,10 @@
       line-height: 1.1;
     }
 
-    .tz-time .ampm {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--muted);
-      margin-left: 3px;
-    }
+    .tz-time .ampm { font-size: 0.9rem; font-weight: 500; color: var(--muted); margin-left: 3px; }
 
-    .tz-date {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .tz-diff {
-      font-size: 0.7rem;
-      margin-top: 6px;
-      color: var(--accent2);
-    }
+    .tz-date { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+    .tz-diff { font-size: 0.7rem; margin-top: 6px; color: var(--accent2); }
 
     .copy-btn {
       position: absolute;
@@ -288,7 +398,6 @@
     .copy-btn:hover { color: var(--accent2); background: var(--surface2); }
     .copy-btn.copied { color: var(--green); }
 
-    /* Day indicator */
     .day-badge {
       display: inline-block;
       font-size: 0.65rem;
@@ -302,7 +411,6 @@
     .day-badge.yesterday { background: rgba(239,68,68,0.15); color: #f87171; }
     .day-badge.tomorrow  { background: rgba(34,197,94,0.15);  color: #4ade80; }
 
-    /* Empty state */
     .empty {
       grid-column: 1 / -1;
       text-align: center;
@@ -314,7 +422,7 @@
     .empty p { font-size: 0.9rem; }
 
     @media (max-width: 600px) {
-      header, .hero, .controls, .grid { padding-left: 16px; padding-right: 16px; }
+      header, .hero, .converter-bar, .controls, .grid { padding-left: 16px; padding-right: 16px; }
     }
   </style>
 </head>
@@ -328,11 +436,32 @@
   <h1>Time <span>Converter</span></h1>
 </header>
 
-<div class="hero">
-  <div class="hero-label">Your local time</div>
+<div class="hero" id="hero">
+  <div class="hero-label" id="heroLabel">Your local time</div>
   <div class="hero-time" id="heroTime">--:--:<span class="seconds">--</span></div>
   <div class="hero-date" id="heroDate"></div>
   <div class="hero-tz" id="heroTz">Detecting...</div>
+  <div class="hero-local-equiv" id="heroLocalEquiv" style="display:none"></div>
+  <button class="btn-live" id="btnLive">
+    <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="var(--green)"/></svg>
+    Back to live
+  </button>
+</div>
+
+<!-- Converter bar -->
+<div class="converter-bar">
+  <span class="conv-label">Convert</span>
+  <div class="conv-input-wrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <input type="text" id="convInput" placeholder='e.g. "7 am PDT"  •  "15:30 UTC+5:30"  •  "9pm JST"' autocomplete="off" />
+    <button class="conv-clear-btn" id="convClear">✕</button>
+  </div>
+  <span class="conv-status" id="convStatus"></span>
+  <div class="conv-examples">
+    <span>7 am PDT</span><span>3pm EST</span><span>15:30 UTC</span><span>9pm JST</span><span>8am GMT+5:30</span><span>noon CET</span>
+  </div>
 </div>
 
 <div class="controls">
@@ -360,31 +489,189 @@
   const TIMEZONES = Intl.supportedValuesOf('timeZone');
   const LOCAL_TZ  = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  let query  = '';
-  let region = 'All';
+  let query     = '';
+  let region    = 'All';
+  let pivotDate = null;   // null = live mode
+  let pivotLabel = '';    // e.g. "7:00 AM PDT"
 
-  // ── helpers ──────────────────────────────────────────────────────────────
+  // ── Timezone abbreviation → IANA map ─────────────────────────────────────
+
+  const TZ_ABBR = {
+    // UTC/GMT
+    UTC: 'UTC', GMT: 'Etc/GMT', Z: 'UTC', UT: 'UTC',
+    // North America
+    PDT: 'America/Los_Angeles', PST: 'America/Los_Angeles', PT: 'America/Los_Angeles',
+    MDT: 'America/Denver',      MST: 'America/Denver',      MT: 'America/Denver',
+    CDT: 'America/Chicago',     CST: 'America/Chicago',     CT: 'America/Chicago',
+    EDT: 'America/New_York',    EST: 'America/New_York',     ET: 'America/New_York',
+    ADT: 'America/Halifax',     AST: 'America/Halifax',      AT: 'America/Halifax',
+    NDT: 'America/St_Johns',    NST: 'America/St_Johns',
+    AKDT: 'America/Anchorage',  AKST: 'America/Anchorage',  AKT: 'America/Anchorage',
+    HST: 'Pacific/Honolulu',    HDT: 'Pacific/Honolulu',    HT: 'Pacific/Honolulu',
+    SST: 'Pacific/Pago_Pago',   CHST: 'Pacific/Guam',
+    // South America
+    BRT: 'America/Sao_Paulo',   BRST: 'America/Sao_Paulo',
+    ART: 'America/Argentina/Buenos_Aires',
+    CLT: 'America/Santiago',    CLST: 'America/Santiago',
+    PET: 'America/Lima',        COT: 'America/Bogota',
+    VET: 'America/Caracas',     BOT: 'America/La_Paz',
+    UYT: 'America/Montevideo',  PYT: 'America/Asuncion',
+    // Europe
+    WET: 'Europe/Lisbon',       WEST: 'Europe/Lisbon',
+    BST: 'Europe/London',
+    CET: 'Europe/Paris',        CEST: 'Europe/Paris',
+    EET: 'Europe/Helsinki',     EEST: 'Europe/Helsinki',
+    MSK: 'Europe/Moscow',       MSD: 'Europe/Moscow',
+    TRT: 'Europe/Istanbul',
+    // Middle East / Africa
+    IRST: 'Asia/Tehran',        IRDT: 'Asia/Tehran',
+    GST: 'Asia/Dubai',          AST_GULF: 'Asia/Riyadh',
+    EAT: 'Africa/Nairobi',      CAT: 'Africa/Harare',
+    WAT: 'Africa/Lagos',        SAST: 'Africa/Johannesburg',
+    // Asia
+    IST: 'Asia/Kolkata',        PKT: 'Asia/Karachi',
+    BST_BD: 'Asia/Dhaka',       ICT: 'Asia/Bangkok',
+    WIB: 'Asia/Jakarta',        WITA: 'Asia/Makassar',      WIT: 'Asia/Jayapura',
+    HKT: 'Asia/Hong_Kong',      SGT: 'Asia/Singapore',
+    MYT: 'Asia/Kuala_Lumpur',   PHT: 'Asia/Manila',
+    JST: 'Asia/Tokyo',          KST: 'Asia/Seoul',
+    NPT: 'Asia/Kathmandu',      BTT: 'Asia/Thimphu',
+    ULAT: 'Asia/Ulaanbaatar',
+    // Australia / Pacific
+    AWST: 'Australia/Perth',    ACST: 'Australia/Darwin',
+    ACDT: 'Australia/Adelaide', AEST: 'Australia/Brisbane',
+    AEDT: 'Australia/Sydney',   LHST: 'Australia/Lord_Howe',
+    NZST: 'Pacific/Auckland',   NZDT: 'Pacific/Auckland',   NZT: 'Pacific/Auckland',
+    FJT: 'Pacific/Fiji',        TOT: 'Pacific/Tongatapu',   WST: 'Pacific/Apia',
+    // Aliases / friendly names (lowercase-normalised key)
+    LONDON: 'Europe/London',    PARIS: 'Europe/Paris',
+    BERLIN: 'Europe/Berlin',    ROME: 'Europe/Rome',
+    MOSCOW: 'Europe/Moscow',    DUBAI: 'Asia/Dubai',
+    INDIA: 'Asia/Kolkata',      MUMBAI: 'Asia/Kolkata',
+    DELHI: 'Asia/Kolkata',      KOLKATA: 'Asia/Kolkata',
+    BANGKOK: 'Asia/Bangkok',    SINGAPORE: 'Asia/Singapore',
+    TOKYO: 'Asia/Tokyo',        SEOUL: 'Asia/Seoul',
+    BEIJING: 'Asia/Shanghai',   SHANGHAI: 'Asia/Shanghai',
+    SYDNEY: 'Australia/Sydney', MELBOURNE: 'Australia/Melbourne',
+    AUCKLAND: 'Pacific/Auckland',
+    NEWYORK: 'America/New_York', NYC: 'America/New_York',
+    CHICAGO: 'America/Chicago', DENVER: 'America/Denver',
+    LA: 'America/Los_Angeles',  LOS_ANGELES: 'America/Los_Angeles',
+    SF: 'America/Los_Angeles',  SEATTLE: 'America/Los_Angeles',
+    TORONTO: 'America/Toronto', VANCOUVER: 'America/Vancouver',
+    SAO_PAULO: 'America/Sao_Paulo', MEXICO: 'America/Mexico_City',
+  };
+
+  // ── Parse "7 am PDT" / "15:30 UTC+5:30" / "noon CET" etc. ───────────────
+
+  function resolveAbbr(raw) {
+    const up = raw.toUpperCase().replace(/[\s_-]/g, '_');
+    if (TZ_ABBR[up]) return TZ_ABBR[up];
+    const nospace = up.replace(/_/g, '');
+    if (TZ_ABBR[nospace]) return TZ_ABBR[nospace];
+    // Try direct IANA match (e.g. "America/New_York")
+    const direct = TIMEZONES.find(tz => tz.toLowerCase() === raw.toLowerCase());
+    if (direct) return direct;
+    return null;
+  }
+
+  function parseOffsetToMs(raw) {
+    // Matches "UTC+5", "GMT-7", "UTC+5:30", "+05:30", "-8"
+    const m = raw.match(/^(?:utc|gmt)?([+-])(\d{1,2})(?::(\d{2}))?$/i);
+    if (!m) return null;
+    const sign = m[1] === '+' ? 1 : -1;
+    const h = parseInt(m[2]);
+    const mm = parseInt(m[3] || '0');
+    return sign * (h * 60 + mm) * 60000;
+  }
+
+  function parseConvInput(raw) {
+    const s = raw.trim();
+    if (!s) return null;
+
+    // Normalise words → numbers: "noon" = 12:00, "midnight" = 0:00
+    let s2 = s.toLowerCase()
+      .replace(/\bnoon\b/,     '12:00 pm')
+      .replace(/\bmidnight\b/, '12:00 am');
+
+    // Extract time: 7, 7am, 7:30, 7:30am, 07:30, 19:00, 7 am, 7:30 pm
+    const timeRx = /(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i;
+    const tMatch = s2.match(timeRx);
+    if (!tMatch) return null;
+
+    let hours   = parseInt(tMatch[1]);
+    const mins  = parseInt(tMatch[2] || '0');
+    const ampm  = tMatch[3]?.toLowerCase();
+
+    if (ampm === 'pm' && hours !== 12) hours += 12;
+    if (ampm === 'am' && hours === 12) hours = 0;
+    // Without am/pm: treat >12 as 24h; ≤12 stays as-is (ambiguous but fine)
+
+    // Everything after the time part = timezone token
+    const afterTime = s2.slice(tMatch.index + tMatch[0].length).trim();
+    if (!afterTime) return null;
+
+    // Try offset notation first: UTC+5, GMT-7, +05:30
+    const offsetMs = parseOffsetToMs(afterTime);
+    if (offsetMs !== null) {
+      const h = Math.abs(Math.round(offsetMs / 3600000));
+      const m = Math.abs(Math.round((offsetMs % 3600000) / 60000));
+      const sign = offsetMs >= 0 ? '+' : '-';
+      const label = `UTC${sign}${h}${m ? ':' + String(m).padStart(2,'0') : ''}`;
+      return { hours, mins, tzIANA: null, offsetMs, label };
+    }
+
+    // Try abbreviation / city lookup
+    const tzIANA = resolveAbbr(afterTime);
+    if (!tzIANA) return null;
+
+    return { hours, mins, tzIANA, offsetMs: null, label: afterTime.toUpperCase() };
+  }
+
+  // ── Build a Date for "hours:mins in timezone" (today) ────────────────────
+
+  function getOffsetMs(tz, approxDate) {
+    const utcStr = approxDate.toLocaleString('en-US', { timeZone: 'UTC' });
+    const tzStr  = approxDate.toLocaleString('en-US', { timeZone: tz });
+    return new Date(tzStr) - new Date(utcStr);
+  }
+
+  function makeDateInTz(parsed) {
+    const now = new Date();
+    let offsetMs;
+
+    if (parsed.tzIANA) {
+      offsetMs = getOffsetMs(parsed.tzIANA, now);
+    } else {
+      offsetMs = parsed.offsetMs;
+    }
+
+    // Get today's date string in the source timezone (YYYY-MM-DD)
+    const dateTz = parsed.tzIANA
+      ? now.toLocaleDateString('en-CA', { timeZone: parsed.tzIANA })
+      : now.toLocaleDateString('en-CA', { timeZone: 'UTC' });
+
+    // Build naive ISO "as if UTC", then subtract the tz offset to get real UTC
+    const naiveISO = `${dateTz}T${String(parsed.hours).padStart(2,'0')}:${String(parsed.mins).padStart(2,'0')}:00Z`;
+    return new Date(new Date(naiveISO).getTime() - offsetMs);
+  }
+
+  // ── Generic helpers ───────────────────────────────────────────────────────
 
   function getOffset(tz, date) {
-    const fmt = new Intl.DateTimeFormat('en', {
-      timeZone: tz, timeZoneName: 'shortOffset'
-    });
-    const parts = fmt.formatToParts(date);
+    const parts = new Intl.DateTimeFormat('en', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(date);
     return parts.find(p => p.type === 'timeZoneName')?.value ?? '';
   }
 
   function formatTime(tz, date) {
     return new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: true
+      timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
     }).format(date);
   }
 
   function formatDate(tz, date) {
     return new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
-      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+      timeZone: tz, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
     }).format(date);
   }
 
@@ -395,19 +682,8 @@
   }
 
   function getOffsetMinutes(tz, date) {
-    const utc  = Date.UTC(
-      ...['en-US'].map(() => {
-        const f = new Intl.DateTimeFormat('en-US', {
-          timeZone: 'UTC',
-          year:'numeric', month:'2-digit', day:'2-digit',
-          hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false
-        });
-        return null;
-      })
-    );
-    // simple method: compare UTC to local
-    const utcDate   = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-    const tzDate    = new Date(date.toLocaleString('en-US', { timeZone: tz }));
+    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const tzDate  = new Date(date.toLocaleString('en-US', { timeZone: tz }));
     return (tzDate - utcDate) / 60000;
   }
 
@@ -416,11 +692,11 @@
     const tzMins    = getOffsetMinutes(tz, date);
     const diff      = tzMins - localMins;
     if (diff === 0) return 'Same as you';
-    const sign  = diff > 0 ? '+' : '−';
-    const abs   = Math.abs(diff);
-    const h     = Math.floor(abs / 60);
-    const m     = abs % 60;
-    return `${sign}${h}${m ? `:${String(m).padStart(2,'0')}` : ''}h from you`;
+    const sign = diff > 0 ? '+' : '−';
+    const abs  = Math.abs(diff);
+    const h    = Math.floor(abs / 60);
+    const m    = abs % 60;
+    return `${sign}${h}${m ? ':' + String(m).padStart(2,'0') : ''}h from you`;
   }
 
   // ── DOM build ─────────────────────────────────────────────────────────────
@@ -476,18 +752,16 @@
           </svg>
         </button>`;
 
-      card.querySelector('[data-copy]').addEventListener('click', (e) => {
+      card.querySelector('[data-copy]').addEventListener('click', e => {
         const btn  = e.currentTarget;
         const time = card.querySelector('[data-time]').textContent;
         const date = card.querySelector('[data-date]').textContent;
         navigator.clipboard.writeText(`${time} — ${date} (${tz})`).then(() => {
           btn.classList.add('copied');
-          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12"/></svg>`;
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
           setTimeout(() => {
             btn.classList.remove('copied');
-            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
           }, 2000);
         });
       });
@@ -496,49 +770,133 @@
     });
   }
 
-  // ── tick ──────────────────────────────────────────────────────────────────
+  // ── Tick ──────────────────────────────────────────────────────────────────
 
   function tick() {
-    const now = new Date();
+    const now  = new Date();
+    const date = pivotDate ?? now;
 
-    // hero
-    const hParts = new Intl.DateTimeFormat('en-US', {
-      timeZone: LOCAL_TZ,
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-    }).formatToParts(now);
+    if (!pivotDate) {
+      // Live mode hero
+      const hParts = new Intl.DateTimeFormat('en-US', {
+        timeZone: LOCAL_TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      }).formatToParts(now);
+      const hh = hParts.find(p => p.type === 'hour')?.value   ?? '--';
+      const mm = hParts.find(p => p.type === 'minute')?.value ?? '--';
+      const ss = hParts.find(p => p.type === 'second')?.value ?? '--';
+      const ap = hParts.find(p => p.type === 'dayPeriod')?.value ?? '';
+      document.getElementById('heroTime').innerHTML =
+        `${hh}:${mm}:<span class="seconds">${ss}</span> <span style="font-size:2rem;font-weight:500;color:var(--muted)">${ap}</span>`;
+      document.getElementById('heroDate').textContent = formatDate(LOCAL_TZ, now);
+      document.getElementById('heroTz').textContent   = LOCAL_TZ;
+    }
 
-    const hh  = hParts.find(p => p.type === 'hour')?.value   ?? '--';
-    const mm  = hParts.find(p => p.type === 'minute')?.value ?? '--';
-    const ss  = hParts.find(p => p.type === 'second')?.value ?? '--';
-    const ap  = hParts.find(p => p.type === 'dayPeriod')?.value ?? '';
-    document.getElementById('heroTime').innerHTML =
-      `${hh}:${mm}:<span class="seconds">${ss}</span> <span style="font-size:2rem;font-weight:500;color:var(--muted)">${ap}</span>`;
-
-    document.getElementById('heroDate').textContent = formatDate(LOCAL_TZ, now);
-    document.getElementById('heroTz').textContent   = LOCAL_TZ;
-
-    // cards
+    // Cards
     document.querySelectorAll('.tz-card').forEach(card => {
       const tz = card.dataset.tz;
-
-      const rawTime = formatTime(tz, now);           // "09:41:07 AM"
+      const rawTime = formatTime(tz, date);
       const [timePart, period] = rawTime.split(' ');
       card.querySelector('[data-time]').innerHTML =
         `${timePart}<span class="ampm">${period}</span>`;
 
-      const dayDiff = getDayDiff(tz, now);
-      let dateTxt   = formatDate(tz, now);
-      let badge     = '';
+      const dayDiff = getDayDiff(tz, date);
+      let badge = '';
       if (dayDiff === -1) badge = '<span class="day-badge yesterday">−1 day</span>';
       if (dayDiff ===  1) badge = '<span class="day-badge tomorrow">+1 day</span>';
-      card.querySelector('[data-date]').innerHTML = dateTxt + badge;
+      card.querySelector('[data-date]').innerHTML = formatDate(tz, date) + badge;
 
-      card.querySelector('[data-offset]').textContent = getOffset(tz, now);
-      card.querySelector('[data-diff]').textContent   = diffLabel(tz, now);
+      card.querySelector('[data-offset]').textContent = getOffset(tz, date);
+      card.querySelector('[data-diff]').textContent   = diffLabel(tz, date);
     });
   }
 
-  // ── init ──────────────────────────────────────────────────────────────────
+  // ── Custom time mode ──────────────────────────────────────────────────────
+
+  function setCustomTime(parsed) {
+    pivotDate  = makeDateInTz(parsed);
+    pivotLabel = parsed.label;
+
+    // Hero: show source time
+    const srcHH  = String(parsed.hours > 12 ? parsed.hours - 12 : parsed.hours || 12).padStart(2, '0');
+    const srcMM  = String(parsed.mins).padStart(2, '0');
+    const srcAP  = parsed.hours >= 12 ? 'PM' : 'AM';
+
+    document.getElementById('heroLabel').textContent = 'Converting from';
+    document.getElementById('heroTime').innerHTML =
+      `${srcHH}:${srcMM} <span style="font-size:2rem;font-weight:500;color:var(--muted)">${srcAP}</span><span class="src-tz-abbr">${parsed.label}</span>`;
+    document.getElementById('heroDate').textContent = formatDate(parsed.tzIANA ?? LOCAL_TZ, pivotDate);
+    document.getElementById('heroTz').textContent   = parsed.tzIANA ?? parsed.label;
+
+    // Show local equivalent
+    const localEquiv = formatTime(LOCAL_TZ, pivotDate).replace(':00 ', ' ').replace(/^0/, '');
+    const localDate  = formatDate(LOCAL_TZ, pivotDate);
+    document.getElementById('heroLocalEquiv').style.display = 'block';
+    document.getElementById('heroLocalEquiv').innerHTML =
+      `= <strong>${localEquiv}</strong> in your timezone (${LOCAL_TZ})`;
+
+    document.getElementById('hero').classList.add('custom-mode');
+    document.getElementById('heroTz').classList.add('custom-src');
+    document.getElementById('btnLive').classList.add('visible');
+    tick();
+  }
+
+  function goLive() {
+    pivotDate  = null;
+    pivotLabel = '';
+    document.getElementById('convInput').value = '';
+    document.getElementById('convInput').className = '';
+    document.getElementById('convStatus').className = 'conv-status';
+    document.getElementById('convStatus').textContent = '';
+    document.getElementById('convClear').classList.remove('visible');
+
+    document.getElementById('heroLabel').textContent = 'Your local time';
+    document.getElementById('hero').classList.remove('custom-mode');
+    document.getElementById('heroTz').classList.remove('custom-src');
+    document.getElementById('btnLive').classList.remove('visible');
+    document.getElementById('heroLocalEquiv').style.display = 'none';
+    tick();
+  }
+
+  // ── Event listeners ───────────────────────────────────────────────────────
+
+  document.getElementById('convInput').addEventListener('input', e => {
+    const val = e.target.value;
+    const clearBtn = document.getElementById('convClear');
+    const status   = document.getElementById('convStatus');
+
+    clearBtn.classList.toggle('visible', val.length > 0);
+
+    if (!val.trim()) {
+      goLive();
+      return;
+    }
+
+    const parsed = parseConvInput(val);
+    if (parsed) {
+      e.target.className = 'ok';
+      status.className   = 'conv-status ok';
+      status.textContent = `→ ${parsed.tzIANA ?? parsed.label}`;
+      setCustomTime(parsed);
+    } else {
+      e.target.className = val.length > 2 ? 'err' : '';
+      status.className   = val.length > 2 ? 'conv-status err' : 'conv-status';
+      status.textContent = val.length > 2 ? 'Unrecognised — try "7am PDT" or "15:30 UTC+5"' : '';
+      if (pivotDate) goLive();
+    }
+  });
+
+  document.getElementById('convClear').addEventListener('click', goLive);
+  document.getElementById('btnLive').addEventListener('click', goLive);
+
+  // Example chips
+  document.querySelectorAll('.conv-examples span').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const input = document.getElementById('convInput');
+      input.value = chip.textContent;
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    });
+  });
 
   document.getElementById('search').addEventListener('input', e => {
     query = e.target.value.trim().toLowerCase();
